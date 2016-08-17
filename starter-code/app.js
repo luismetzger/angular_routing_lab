@@ -1,23 +1,53 @@
-var app = angular.module('wineApp', []);
+var app = angular.module('wineApp', ['ngRoute', 'ngResource']);
 
-console.log('Angular is working.');
+  console.log('Angular is working.');
 
-////////////
-// ROUTES //
-////////////
+  app.factory('Wines', function($resource) {
+    return $resource('http://daretoexplore.herokuapp.com/wines/')
+  });
+
+  app.factory("Wine", function($resource) {
+    return $resource("http://daretoexplore.herokuapp.com/wines/:id")
+  });
+
+
+  app.config(function($routeProvider, $locationProvider) {
+    $routeProvider
+      .when('/', {
+        templateUrl: '/templates/wines-index.html',
+        controller: 'WinesIndexCtrl'
+      })
+      .when('/wines/:id', { // the "id" parameter
+        templateUrl: 'templates/wines-show.html',
+        controller: 'WinesShowCtrl'
+      })
+      $locationProvider
+        .html5Mode({
+          enabled: true,
+          requireBase: false
+        });
+
+  });
 
 
 /////////////////
 // CONTROLLERS //
 /////////////////
 
-app.controller('WinesIndexCtrl',function($scope){
-  console.log("Wine Index")
-})
+app.controller('WinesIndexCtrl',function($scope, Wines){
+  // $scope.hello = "Wine index controller is working!";
+  // $scope.wines = WineService.query();
+  $scope.wines = Wines.query();
 
-app.controller('WinesShowCtrl',function($scope){
-  console.log("Wine Show")
-})
+
+});
+
+app.controller('WinesShowCtrl',function($scope, Wine, $routeParams){
+  console.log($routeParams.id);
+  console.log(Wine);
+
+  $scope.wine = Wine.get({id: $routeParams.id});
+});
 
 ////////////
 // MODELS //
@@ -40,7 +70,7 @@ app.factory('WineService', function(){
 
   return WineService;
 
-})
+});
 
 
 
